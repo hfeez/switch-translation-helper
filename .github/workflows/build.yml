@@ -1,0 +1,23 @@
+name: build
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: python -m pip install -r requirements.txt pyinstaller
+      - run: python -m unittest discover -s tests
+      - run: pyinstaller --noconfirm --clean --windowed --name SwitchTranslationHelper main.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SwitchTranslationHelper-${{ matrix.os }}
+          path: dist/
+
